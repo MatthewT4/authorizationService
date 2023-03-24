@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) {
+func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) error {
 	if len(ctx.Params("login")) == 0 {
 		ctx.Status(http.StatusBadRequest)
 		var err struct {
@@ -16,7 +16,7 @@ func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) {
 		err.Message = "" // write later...
 		mes, _ := json.Marshal(&err)
 		ctx.Write(mes)
-		return
+		return nil
 	}
 
 	if len(ctx.Params("password")) == 0 {
@@ -27,7 +27,7 @@ func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) {
 		err.Message = "password" // write later...
 		mes, _ := json.Marshal(&err)
 		ctx.Write(mes)
-		return
+		return nil
 	}
 
 	login := ctx.Get("login")
@@ -40,5 +40,5 @@ func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) {
 	fmt.Println(login, password)
 	ctx.Write([]byte("OK"))
 
-	return
+	return nil
 }

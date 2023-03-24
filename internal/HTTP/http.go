@@ -19,7 +19,7 @@ func (h *Http) Start() {
 	v1 := app.Group("/v1")
 	admin := v1.Group("/admin")
 
-	admin.Get("/login")
+	admin.Get("/login", h.CreateAdminLogin)
 
 	app.Listen(":80")
 }

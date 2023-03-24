@@ -1,6 +1,8 @@
 package BLogic
 
-import "authorizationService/internal/DB"
+import (
+	"authorizationService/internal/DB"
+)
 
 type BLogic struct {
 	database *DB.DataBase
