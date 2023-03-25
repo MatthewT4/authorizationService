@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"authorizationService/internal"
+	"fmt"
+)
 
 func main() {
-	fmt.Println(123)
+	fmt.Println("Server starting...")
+	internal.ServerStarted()
 }

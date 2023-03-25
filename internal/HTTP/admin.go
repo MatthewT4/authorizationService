@@ -2,20 +2,43 @@ package HTTP
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 )
 
-func (h *Http) CreateAdminLogin(w http.ResponseWriter, r *http.Request) {
-	var user struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) error {
+	if len(ctx.Params("login")) == 0 {
+		ctx.Status(http.StatusBadRequest)
+		var err struct {
+			Message string `json:"message"`
+		}
+		err.Message = "" // write later...
+		mes, _ := json.Marshal(&err)
+		ctx.Write(mes)
+		return nil
 	}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&user)
-	if err != nil {
-		panic(err)
+
+	if len(ctx.Params("password")) == 0 {
+		ctx.Status(http.StatusBadRequest)
+		var err struct {
+			Message string `json:"message"`
+		}
+		err.Message = "password" // write later...
+		mes, _ := json.Marshal(&err)
+		ctx.Write(mes)
+		return nil
 	}
-	log.Println(user)
-	w.WriteHeader(http.StatusOK)
+
+	login := ctx.Get("login")
+
+	password := ctx.Get("password")
+
+	// Blogic.login()
+
+	// return JWT
+	fmt.Println(login, password)
+	ctx.Write([]byte("OK"))
+
+	return nil
 }

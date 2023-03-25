@@ -10,9 +10,9 @@ type DataBase struct {
 	DB *sql.DB
 }
 
-func NewDataBase(confic string) *DataBase {
-	confic = "user=postgres password=mypass dbname=productdb sslmode=disable"
-	db, err := sql.Open("postgres", confic)
+func NewDataBase(config string) *DataBase {
+	//config = "user=postgres password=mypass dbname=productdb sslmode=disable"
+	db, err := sql.Open("postgres", config)
 	if err != nil {
 
 	}
