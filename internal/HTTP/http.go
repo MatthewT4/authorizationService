@@ -1,16 +1,17 @@
 package HTTP
 
 import (
-	"authorizationService/internal/BLogic"
+	AdminBLogic "authorizationService/internal/BLogic/admin"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Http struct {
-	blogic *BLogic.BLogic
+	//blogic      *BLogic.B
+	adminBLogic AdminBLogic.IAdmBLogic
 }
 
 func NewHttp(config string) *Http {
-	return &Http{blogic: BLogic.NewBLogic(config)}
+	return &Http{adminBLogic: AdminBLogic.NewAdmBLogic(config)}
 }
 
 func (h *Http) Start() {
