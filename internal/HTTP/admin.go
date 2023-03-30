@@ -45,7 +45,6 @@ func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) error {
 	ctx.SendStatus(httpStatus)
 
 	// return JWT
-	ctx.Write([]byte("OK"))
 	ctx.Cookie(&fiber.Cookie{
 		Value: jwtToken,
 	})

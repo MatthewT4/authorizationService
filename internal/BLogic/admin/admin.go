@@ -27,7 +27,7 @@ func CheckValid(login, password string) (int, string) {
 		return http.StatusBadRequest, ""
 	}
 
-	jwtToken, err := AdminDataBase.GenerateJWTToken(login)
+	jwtToken, err := AdminDataBase.GenerateJWTToken(login, password)
 	if err != nil {
 		return http.StatusInternalServerError, ""
 	}
