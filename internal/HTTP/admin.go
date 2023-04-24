@@ -1,21 +1,53 @@
 package HTTP
 
 import (
+	AdminBLogic "authorizationService/internal/BLogic/admin"
 	"encoding/json"
-	"log"
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 )
 
-func (h *Http) CreateAdminLogin(w http.ResponseWriter, r *http.Request) {
-	var user struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+type Cookie struct {
+	Value string `json:"value"`
+}
+
+func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) error {
+	// check login
+	if len(ctx.Query("login")) == 0 {
+		ctx.Status(http.StatusBadRequest)
+		var err struct {
+			Message string `json:"message"`
+		}
+		err.Message = "incorrect login" // write later...
+		mes, _ := json.Marshal(&err)
+		ctx.Write(mes)
+		return nil
 	}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&user)
-	if err != nil {
-		panic(err)
+
+	login := ctx.Query("login")
+
+	//check password
+	if len(ctx.Query("password")) == 0 {
+		ctx.Status(http.StatusBadRequest)
+		var err struct {
+			Message string `json:"message"`
+		}
+		err.Message = "incorrect password" // write later...
+		mes, _ := json.Marshal(&err)
+		ctx.Write(mes)
+		return nil
 	}
-	log.Println(user)
-	w.WriteHeader(http.StatusOK)
+
+	password := ctx.Query("password")
+
+	// Blogic.login()
+	httpStatus, jwtToken := AdminBLogic.CheckValid(login, password)
+	ctx.SendStatus(httpStatus)
+
+	// return JWT
+	ctx.Cookie(&fiber.Cookie{
+		Value: jwtToken,
+	})
+
+	return nil
 }

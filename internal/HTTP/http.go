@@ -1,20 +1,26 @@
 package HTTP
 
 import (
-	"authorizationService/internal/BLogic"
-	"github.com/gorilla/mux"
+	AdminBLogic "authorizationService/internal/BLogic/admin"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Http struct {
-	blogic *BLogic.BLogic
+	//blogic      *BLogic.B
+	adminBLogic AdminBLogic.IAdmBLogic
 }
 
 func NewHttp(config string) *Http {
-	return &Http{blogic: BLogic.NewBLogic(config)}
+	return &Http{adminBLogic: AdminBLogic.NewAdmBLogic(config)}
 }
 
 func (h *Http) Start() {
-	router := mux.NewRouter()
-	routerAdmin := router.PathPrefix("/admin").Subrouter()
-	routerAdmin.HandleFunc("/create_user", h.CreateAdminLogin)
+	app := fiber.New()
+
+	v1 := app.Group("/v1")
+	admin := v1.Group("/admin")
+
+	admin.Get("/login", h.CreateAdminLogin)
+
+	app.Listen(":80")
 }
