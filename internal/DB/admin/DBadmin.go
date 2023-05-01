@@ -20,7 +20,8 @@ type User struct {
 	phone    string
 }
 
-type IAdminDB interface{}
+type IAdminDB interface {
+}
 
 type Claims struct {
 	jwt.StandardClaims
