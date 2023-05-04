@@ -2,12 +2,14 @@ module authorizationService
 
 go 1.19
 
-require github.com/lib/pq v1.10.7
+require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/lib/pq v1.10.7
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/gofiber/fiber/v2 v2.44.0 // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

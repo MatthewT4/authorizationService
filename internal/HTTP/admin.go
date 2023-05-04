@@ -23,7 +23,6 @@ func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) error {
 		ctx.Write(mes)
 		return nil
 	}
-
 	login := ctx.Query("login")
 
 	//check password
@@ -37,7 +36,6 @@ func (h *Http) CreateAdminLogin(ctx *fiber.Ctx) error {
 		ctx.Write(mes)
 		return nil
 	}
-
 	password := ctx.Query("password")
 
 	// Blogic.login()

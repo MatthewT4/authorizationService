@@ -11,6 +11,8 @@ type AdminDB struct {
 	db *sql.DB
 }
 
+var database AdminDB
+
 type User struct {
 	id       int
 	email    string
@@ -20,8 +22,7 @@ type User struct {
 	phone    string
 }
 
-type IAdminDB interface {
-}
+type IAdminDB interface{}
 
 type Claims struct {
 	jwt.StandardClaims
@@ -42,11 +43,12 @@ func NewAdminDB(config string) *AdminDB {
 	db, err := sql.Open("postgres", config)
 	if err != nil {
 	}
+	database = AdminDB{db: db}
 	return &AdminDB{db: db}
 }
 
 func GenerateJWTToken(login, password string) (string, error) {
-	if checkPassword(login, password) == false {
+	if database.checkPassword(login, password) == false {
 		return "", errors.New("incorrect login or password")
 	}
 
@@ -62,19 +64,13 @@ func GenerateJWTToken(login, password string) (string, error) {
 	return str, err
 }
 
-func checkPassword(login, password string) bool {
-	config := "host=127.0.0.1 port=5432 user=postgres password=1234 dbname=test sslmode=disable" // тут мой конфиг
-	db, err := sql.Open("postgres", config)
-	if err != nil {
-		panic(err)
-	}
-
-	row := db.QueryRow(`select * from "user" where email=$1`, login)
-	if err != nil {
-		panic(err)
-	}
+func (a AdminDB) checkPassword(login, password string) bool {
+	row := a.db.QueryRow(`select * from "user" where email=$1`, login)
 	user := User{}
-	err = row.Scan(&user.id, &user.email, &user.password, &user.name, &user.surname, &user.phone)
+	err := row.Scan(&user.id, &user.email, &user.password, &user.name, &user.surname, &user.phone)
+	if err != nil {
+		panic(err)
+	}
 	if (user == User{}) { // no user with this login
 		return false
 	}
