@@ -2,35 +2,88 @@ package AdminBLogic
 
 import (
 	AdminDataBase "authorizationService/internal/DB/admin"
-	"net/http"
+	"authorizationService/internal/Structs"
+	"errors"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"regexp"
 )
 
-var validEmail = regexp.MustCompile(`\w+@\w+\.\w`)
+var (
+	validName    = regexp.MustCompile(`[a-zA-Zа-яА-ЯёЁ]{2,20}`)
+	validSurname = regexp.MustCompile(`[a-zA-Zа-яА-ЯёЁ]{2,30}`)
+	validEmail   = regexp.MustCompile(`\w{4,15}@\w{4,8}\.\w{2,5}`)
+	validPhone   = regexp.MustCompile(`[0-9]{8,15}`)
+	validPass    = regexp.MustCompile(`[\w*!@#$%^&?]{8,30}`)
+)
 
 type AdmBLogic struct {
 	database AdminDataBase.IAdminDB
 }
 
-type IAdmBLogic interface{}
+type IAdmBLogic interface {
+	SignUp(inputUser *Structs.UserSignUpInput) (string, error)
+}
 
 func NewAdmBLogic(config string) *AdmBLogic {
 	return &AdmBLogic{database: AdminDataBase.NewAdminDB(config)}
 }
 
-func CheckValid(login, password string) (int, string) {
-	if len(login) > 320 || validEmail.MatchString(login) == false {
-		return http.StatusBadRequest, ""
+func (b *AdmBLogic) SignUp(inputUser *Structs.UserSignUpInput) (string, error) {
+	if !validEmail.MatchString(inputUser.Email) {
+		return "incorrect email", errors.New("incorrect email")
+	}
+	if !validPass.MatchString(inputUser.Password) {
+		return "incorrect password", errors.New("incorrect password")
+	}
+	if !validName.MatchString(inputUser.Name) {
+		return "incorrect name", errors.New("incorrect name")
+	}
+	if !validSurname.MatchString(inputUser.Surname) {
+		return "incorrect surname", errors.New("incorrect surname")
+	}
+	if !validPhone.MatchString(inputUser.Phone) {
+		return "incorrect phone", errors.New("incorrect phone")
 	}
 
-	if len(password) > 120 || len(password) < 5 {
-		return http.StatusBadRequest, ""
+	if err := b.database.CheckUniqUser(inputUser.Email); err != nil {
+		return fmt.Sprintf("user with email %s already exists", inputUser.Email), err
 	}
 
-	jwtToken, err := AdminDataBase.GenerateJWTToken(login, password)
+	hash, err := bcrypt.GenerateFromPassword([]byte(inputUser.Password), 10)
 	if err != nil {
-		return http.StatusInternalServerError, ""
+		return "error on hashing password", err
 	}
 
-	return http.StatusOK, jwtToken
+	user := &Structs.User{
+		Email:        inputUser.Email,
+		HashPassword: string(hash),
+		Name:         inputUser.Name,
+		Surname:      inputUser.Surname,
+		Phone:        inputUser.Phone,
+	}
+
+	if err := b.database.AddUser(user); err != nil {
+		return "error on adding user to database", err
+	}
+
+	return "", nil
 }
+
+//
+//func CheckValid(login, password string) (int, string) {
+//	if len(login) > 320 || validEmail.MatchString(login) == false {
+//		return http.StatusBadRequest, ""
+//	}
+//
+//	if len(password) > 120 || len(password) < 5 {
+//		return http.StatusBadRequest, ""
+//	}
+//
+//	jwtToken, err := AdminDataBase.GenerateJWTToken(login, password)
+//	if err != nil {
+//		return http.StatusInternalServerError, ""
+//	}
+//
+//	return http.StatusOK, jwtToken
+//}

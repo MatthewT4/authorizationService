@@ -3,10 +3,16 @@ package internal
 import (
 	"authorizationService/internal/HTTP"
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"os"
 )
 
 func ServerStarted() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("no .env file found")
+	}
+
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")

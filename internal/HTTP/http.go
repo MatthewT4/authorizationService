@@ -3,10 +3,10 @@ package HTTP
 import (
 	AdminBLogic "authorizationService/internal/BLogic/admin"
 	"github.com/gofiber/fiber/v2"
+	"log"
 )
 
 type Http struct {
-	//blogic      *BLogic.B
 	adminBLogic AdminBLogic.IAdmBLogic
 }
 
@@ -20,7 +20,9 @@ func (h *Http) Start() {
 	v1 := app.Group("/v1")
 	admin := v1.Group("/admin")
 
-	admin.Get("/login", h.CreateAdminLogin)
+	admin.Post("/signup", h.userSignUp)
+	admin.Post("/login", h.userSignIn)
+	admin.Get("/validate", h.requireAuth, h.validate)
 
-	app.Listen(":80")
+	log.Fatal(app.Listen(":80"))
 }
