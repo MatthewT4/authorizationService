@@ -65,7 +65,7 @@ func GenerateJWTToken(login, password string) (string, error) {
 }
 
 func (a AdminDB) checkPassword(login, password string) bool {
-	row := a.db.QueryRow(`select * from "user" where email=$1`, login)
+	row := a.db.QueryRow(`select * from "users" where email=$1`, login)
 	user := User{}
 	err := row.Scan(&user.id, &user.email, &user.password, &user.name, &user.surname, &user.phone)
 	if err != nil {

@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS session;
+
+DROP TABLE IF EXISTS service;
+
+DROP TABLE IF EXISTS users;
