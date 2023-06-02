@@ -3,10 +3,14 @@ package AdminBLogic
 import (
 	AdminDataBase "authorizationService/internal/DB/admin"
 	"authorizationService/internal/Structs"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"os"
 	"regexp"
+	"time"
 )
 
 var (
@@ -24,6 +28,7 @@ type AdmBLogic struct {
 type IAdmBLogic interface {
 	SignUp(inputUser *Structs.UserSignUpInput) (string, error)
 	SignIn(inputUser *Structs.UserSignInInput) (string, error)
+	ParseJWTToken(tokenString string) ([]byte, string, error)
 }
 
 func NewAdmBLogic(config string) *AdmBLogic {
@@ -80,6 +85,38 @@ func (b *AdmBLogic) SignIn(inputUser *Structs.UserSignInInput) (string, error) {
 	}
 
 	return b.database.CheckPassword(inputUser)
+}
+
+func (b *AdmBLogic) ParseJWTToken(tokenString string) ([]byte, string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("SECRET")), nil
+	})
+	if err != nil {
+		return nil, "server couldn't parse jwt token", err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if float64(time.Now().Unix()) > claims["exp"].(float64) {
+			return nil, "expiration of JWT ended", errors.New("expiration of JWT ended")
+		}
+
+		output, err := b.database.GetInfoByUserId(int(claims["sub"].(float64)))
+		if err != nil {
+			return nil, "no info about user", err
+		}
+
+		bytes, err := json.Marshal(output)
+		if err != nil {
+			return nil, err.Error(), err
+		}
+
+		return bytes, "", nil
+	} else {
+		return nil, "JWT token has error", errors.New("JWT token has error")
+	}
 }
 
 //

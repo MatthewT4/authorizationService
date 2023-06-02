@@ -3,7 +3,7 @@ package Structs
 type User struct {
 	UserId       int    `json:"user_id"`
 	Email        string `json:"email"`
-	HashPassword string `json:"password"`
+	HashPassword string `json:"hash_password"`
 	Name         string `json:"name"`
 	Surname      string `json:"surname"`
 	Phone        string `json:"phone"`

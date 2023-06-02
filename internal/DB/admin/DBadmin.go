@@ -20,6 +20,7 @@ type IAdminDB interface {
 	AddUser(user *Structs.User) error
 	CheckUniqUser(email string) error
 	CheckPassword(user *Structs.UserSignInInput) (string, error)
+	GetInfoByUserId(userId int) (interface{}, error)
 }
 
 func NewAdminDB(config string) *AdminDB {
@@ -78,6 +79,18 @@ func (d *AdminDB) CreateJWTToken(userId int) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (d *AdminDB) GetInfoByUserId(userId int) (interface{}, error) {
+	output := Structs.User{}
+
+	row := d.db.QueryRow("SELECT * FROM \"users\" WHERE user_id=$1", userId)
+	err := row.Scan(&output.UserId, &output.Email, &output.HashPassword, &output.Name, &output.Surname, &output.Phone)
+	if err != nil {
+		return nil, err
+	}
+
+	return output, nil
 }
 
 //func GenerateJWTToken(login, password string) (string, error) {
