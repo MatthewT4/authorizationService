@@ -4,8 +4,12 @@ import (
 	"authorizationService/internal/Structs"
 	"database/sql"
 	"errors"
+	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 	"log"
+	"os"
+	"time"
 )
 
 type AdminDB struct {
@@ -15,6 +19,7 @@ type AdminDB struct {
 type IAdminDB interface {
 	AddUser(user *Structs.User) error
 	CheckUniqUser(email string) error
+	CheckPassword(user *Structs.UserSignInInput) (string, error)
 }
 
 func NewAdminDB(config string) *AdminDB {
@@ -40,6 +45,39 @@ func (d *AdminDB) AddUser(user *Structs.User) error {
 	_, err := d.db.Exec("INSERT INTO \"users\" (email,password,name,surname,phone)"+
 		"VALUES ($1,$2,$3,$4,$5)", user.Email, user.HashPassword, user.Name, user.Surname, user.Phone)
 	return err
+}
+
+func (d *AdminDB) CheckPassword(user *Structs.UserSignInInput) (string, error) {
+	var userId int
+	var hashPassword string
+	row := d.db.QueryRow("SELECT user_id, password FROM \"users\" WHERE email=$1", user.Email)
+
+	if err := row.Scan(&userId, &hashPassword); err != nil {
+		return "some wrong on server", err
+	}
+	if hashPassword == "" {
+		return "no user with this email, please signup", errors.New("no user with this email")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(user.Password)); err != nil {
+		return "incorrect password", err
+	}
+
+	return d.CreateJWTToken(userId)
+}
+
+func (d *AdminDB) CreateJWTToken(userId int) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": userId,
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 //func GenerateJWTToken(login, password string) (string, error) {

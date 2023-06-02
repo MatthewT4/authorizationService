@@ -16,3 +16,8 @@ type UserSignUpInput struct {
 	Surname  string `json:"surname"`
 	Phone    string `json:"phone"`
 }
+
+type UserSignInInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

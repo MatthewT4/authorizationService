@@ -21,6 +21,7 @@ func (h *Http) userSignUp(ctx *fiber.Ctx) error {
 
 	msg, err := h.adminBLogic.SignUp(inputUser)
 	if err != nil {
+		log.Println(err)
 		return fiber.NewError(http.StatusBadRequest, msg)
 	}
 
@@ -28,6 +29,23 @@ func (h *Http) userSignUp(ctx *fiber.Ctx) error {
 }
 
 func (h *Http) userSignIn(ctx *fiber.Ctx) error {
+	inputUser := new(Structs.UserSignInInput)
+
+	if err := ctx.BodyParser(inputUser); err != nil {
+		log.Println(err)
+		return fiber.NewError(http.StatusBadRequest, "bad request, please check params")
+	}
+
+	msg, err := h.adminBLogic.SignIn(inputUser)
+	if err != nil {
+		log.Println(err)
+		return fiber.NewError(http.StatusBadRequest, msg)
+	}
+
+	ctx.Cookie(&fiber.Cookie{
+		Name:  "Authorization",
+		Value: msg,
+	})
 	return ctx.SendString("successful login")
 }
 

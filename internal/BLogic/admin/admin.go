@@ -23,6 +23,7 @@ type AdmBLogic struct {
 
 type IAdmBLogic interface {
 	SignUp(inputUser *Structs.UserSignUpInput) (string, error)
+	SignIn(inputUser *Structs.UserSignInInput) (string, error)
 }
 
 func NewAdmBLogic(config string) *AdmBLogic {
@@ -31,19 +32,19 @@ func NewAdmBLogic(config string) *AdmBLogic {
 
 func (b *AdmBLogic) SignUp(inputUser *Structs.UserSignUpInput) (string, error) {
 	if !validEmail.MatchString(inputUser.Email) {
-		return "incorrect email", errors.New("incorrect email")
+		return "invalid email", errors.New("invalid email")
 	}
 	if !validPass.MatchString(inputUser.Password) {
-		return "incorrect password", errors.New("incorrect password")
+		return "invalid password", errors.New("invalid password")
 	}
 	if !validName.MatchString(inputUser.Name) {
-		return "incorrect name", errors.New("incorrect name")
+		return "invalid name", errors.New("invalid name")
 	}
 	if !validSurname.MatchString(inputUser.Surname) {
-		return "incorrect surname", errors.New("incorrect surname")
+		return "invalid surname", errors.New("invalid surname")
 	}
 	if !validPhone.MatchString(inputUser.Phone) {
-		return "incorrect phone", errors.New("incorrect phone")
+		return "invalid phone", errors.New("invalid phone")
 	}
 
 	if err := b.database.CheckUniqUser(inputUser.Email); err != nil {
@@ -68,6 +69,17 @@ func (b *AdmBLogic) SignUp(inputUser *Structs.UserSignUpInput) (string, error) {
 	}
 
 	return "", nil
+}
+
+func (b *AdmBLogic) SignIn(inputUser *Structs.UserSignInInput) (string, error) {
+	if !validEmail.MatchString(inputUser.Email) {
+		return "invalid email", errors.New("invalid email")
+	}
+	if !validPass.MatchString(inputUser.Password) {
+		return "invalid password", errors.New("invalid password")
+	}
+
+	return b.database.CheckPassword(inputUser)
 }
 
 //
