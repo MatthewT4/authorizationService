@@ -2,10 +2,11 @@ package main
 
 import (
 	"authorizationService/internal"
-	"fmt"
+	"log"
 )
 
 func main() {
-	fmt.Println("Server starting...")
+	log.Println("Server starting...")
+
 	internal.ServerStarted()
 }
